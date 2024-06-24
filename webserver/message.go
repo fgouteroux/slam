@@ -30,7 +30,7 @@ func (ws *webserver) sendSlackMessage(channel, title, titleLink, text, footer, c
 	}
 	msgoptions := []slack.MsgOption{}
 
-	if timestamp != "" && update == false {
+	if timestamp != "" && !update {
 		msgoptions = append(msgoptions, slack.MsgOptionTS(timestamp))
 	}
 
@@ -75,7 +75,7 @@ func renderTemplate(msg *alertmanagerTmpl.Data, templateName string) (string, er
 
 	if templateName == "" {
 		var tmpl *template.Template
-		tmpl, err = template.New("default").Parse(defaultMsgTmpl)
+		tmpl, _ = template.New("default").Parse(defaultMsgTmpl)
 		err = tmpl.Execute(&rendered, msg)
 	} else {
 		err = msgTmpl.ExecuteTemplate(&rendered, templateName, msg)

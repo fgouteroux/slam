@@ -28,5 +28,5 @@ test:
 	go tool cover -func=cover.out
 
 release:
-	goreleaser release --skip-publish --rm-dist
+	goreleaser release --skip-publish --clean
 

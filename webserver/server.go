@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-var testQuit chan os.Signal
-
 func NewServerWithTimeout(listenAddress string, readTimeout, writeTimeout, idleTimeout int, t time.Duration) (*http.Server, chan struct{}) {
 
 	idleConnectionsClosed := make(chan struct{})
@@ -23,7 +21,7 @@ func NewServerWithTimeout(listenAddress string, readTimeout, writeTimeout, idleT
 		IdleTimeout:  time.Duration(idleTimeout) * time.Second,
 	}
 
-	sigChan := make(chan os.Signal)
+	sigChan := make(chan os.Signal, 1)
 
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 

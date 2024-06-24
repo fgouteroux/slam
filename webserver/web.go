@@ -21,8 +21,9 @@ var (
 		Name: "slam_message_sent_errors",
 		Help: "Number of errors posting message to channels.",
 	})
-	localCache *memcache.MemCache
-	redisCache *redigo.Pool
+	localCache    *memcache.MemCache
+	redisCache    *redigo.Pool
+	redisCacheTTL int
 )
 
 func init() {
@@ -44,7 +45,7 @@ func New(s *slack.Client, cache string) *webserver {
 }
 
 // Init a webserver with Gin
-func (ws *webserver) Init(debugEnabled bool, templateFiles, redisHost string, redisDB int) *gin.Engine {
+func (ws *webserver) Init(debugEnabled bool, templateFiles, redisHost string, redisDB, redisKeyTTL int) *gin.Engine {
 	if templateFiles != "" {
 		msgTmpl = template.Must(template.ParseGlob(templateFiles))
 	}
@@ -60,6 +61,8 @@ func (ws *webserver) Init(debugEnabled bool, templateFiles, redisHost string, re
 		} else {
 			log.Info("Redis is ready: ", redisHost)
 		}
+
+		redisCacheTTL = redisKeyTTL
 	}
 
 	debug = debugEnabled

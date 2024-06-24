@@ -26,7 +26,8 @@ func main() {
 	cache := flag.String("cache", "local", "Cache type (local or redis)")
 
 	redisDB := flag.Int("cache.redis.db", 0, "Redis DB")
-	redisHost := flag.String("cache.redis.host", "localhost:6379", "Redis host ")
+	redisHost := flag.String("cache.redis.host", "localhost:6379", "Redis host")
+	redisKeyTTL := flag.Int("cache.redis.key-ttl", 1296000, "Redis key ttl in seconds")
 
 	serverListenAddress := flag.String("server.http-listen-address", "", " Listen address for HTTP server")
 	serverListenPort := flag.Int("server.http-listen-port", 8080, " Listen address for HTTP server")
@@ -87,7 +88,7 @@ func main() {
 		*serverIdleTimeout,
 		time.Duration(*serverGraceTimeout)*time.Second,
 	)
-	srv.Handler = ws.Init(*debug, *templateFiles, *redisHost, *redisDB)
+	srv.Handler = ws.Init(*debug, *templateFiles, *redisHost, *redisDB, *redisKeyTTL)
 
 	if *serverTLSCertPath != "" && *serverTLSKeyPath != "" {
 		err = srv.ListenAndServeTLS(*serverTLSCertPath, *serverTLSKeyPath)

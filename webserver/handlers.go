@@ -40,7 +40,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 	}
 
 	var channelID, timestamp string
-	
+
 	// Try to get the value from the cache
 	if ws.Cache == "local" {
 		cached, ok := localCache.Get(key)
@@ -53,7 +53,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 		jsonData, err := redis.Get(redisCache, key)
 		if err == nil {
 			var data map[string]string
-			json.Unmarshal([]byte(jsonData), &data)
+			_ = json.Unmarshal([]byte(jsonData), &data)
 			timestamp = data["timestamp"]
 			channelID = data["channelID"]
 		}
@@ -83,7 +83,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 			localCache.Set(key, data)
 		} else if ws.Cache == "redis" {
 			dataraw, _ := json.Marshal(data)
-			err = redis.Set(redisCache, key, []byte(dataraw), 0)
+			err = redis.Set(redisCache, key, []byte(dataraw), redisCacheTTL)
 			if err != nil {
 				log.Errorf("Could not set key in redis: %v", err)
 			}
@@ -93,7 +93,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 
 		if timestamp != "" {
 			// update color of original message
-			_, timestamp, err = ws.sendSlackMessage(
+			_, _, err = ws.sendSlackMessage(
 				channelID,
 				msg.CommonAnnotations["summary"],
 				msg.CommonAnnotations["title_link"],
@@ -110,12 +110,15 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 			if ws.Cache == "local" {
 				localCache.Del(key)
 			} else if ws.Cache == "redis" {
-				redis.Delete(redisCache, key)
+				_, err := redis.Delete(redisCache, key)
+				if err != nil {
+					log.Errorf("unable to delete redis key: %s", key)
+				}
 			}
 
 		} else {
 			log.Infof("Key '%s' not found in cache, couldn't update original message.", key)
-			_, timestamp, err = ws.sendSlackMessage(
+			_, _, err = ws.sendSlackMessage(
 				channelName,
 				msg.CommonAnnotations["summary"],
 				msg.CommonAnnotations["title_link"],

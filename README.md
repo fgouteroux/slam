@@ -15,6 +15,8 @@ Usage of slam:
     	Redis DB
   -cache.redis.host string
     	Redis host  (default "localhost:6379")
+  -cache.redis.key-ttl int
+      Redis key ttl in seconds (default 1296000)
   -debug
     	Enable debug mode
   -server.grace-timeout int
