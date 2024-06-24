@@ -31,7 +31,8 @@
   },
   "commonAnnotations": {
     "description": "some description",
-    "summary": "some summary"
+    "summary": "some summary",
+    "title_link": "http://example.com:9093"
   },
   "externalURL": "http://example.com:9093",
   "version": "4",

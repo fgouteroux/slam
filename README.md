@@ -3,6 +3,8 @@ Send alertmanager alerts notifications to slack without creating webhook url for
 
 It update the original slack channel message to avoid searching if an alert is resolved or not.
 
+![](examples/slam.gif)
+
 ## usage
 
 ```
@@ -38,3 +40,36 @@ Usage of slam:
   -version
     	show version
 ```
+
+## How it's works
+
+slam use the webhook config from alertmanager: https://prometheus.io/docs/alerting/latest/configuration/#webhook_config
+
+slam use the `groupKey` from webhook json payload, to identify if:
+* the slack message has already been sent (for firing status)
+* the original slack message should be updated (for resolved status)
+
+This key is stored in local memory or redis.
+
+If the key is not found, it send a new message in the slack channel.
+
+
+## Template
+
+As using webhook format, there is no templating from alertmanager. So we enable the template feature in slam to allow formating slack message. By default, we apply a simple slack message format (cf gif image)
+
+It's possible to define different template and to choose it in the query url.
+
+Run slam with template location:
+```
+slam -template-files examples/*.tmpl
+```
+
+Send an alert and use slack.tmpl file template:
+```
+curl "http://localhost:8080/webhook/mychann?template=slack.tmpl" -X POST -H "Content-type: application/json" -d @payload.json
+```
+
+## Limitations
+
+If the webhook payload contains several alerts, it will wait that all alerts be resolved before update the original message.
