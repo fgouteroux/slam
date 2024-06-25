@@ -15,13 +15,13 @@ func (ws *webserver) healthHandler(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }
 
-func (ws *webserver) handleWebhook(c *gin.Context) error {
+func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 	log.Debug(c.Request.Header)
 
 	msg := &alertmanagerTmpl.Data{}
 	err := c.ShouldBindJSON(msg)
 	if err != nil {
-		return err
+		return err, ""
 	}
 
 	channelName := c.Param("channel")
@@ -31,7 +31,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 
 	renderedStr, err := renderTemplate(msg, templateName)
 	if err != nil {
-		return err
+		return err, channelName
 	}
 
 	color := "danger"
@@ -71,7 +71,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 			false,
 		)
 		if err != nil {
-			return err
+			return err, channelName
 		}
 		data := map[string]string{
 			"status":    msg.Status,
@@ -104,7 +104,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 				true,
 			)
 			if err != nil {
-				return err
+				return err, channelName
 			}
 			// remove key from cache
 			if ws.Cache == "local" {
@@ -129,13 +129,13 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 				false,
 			)
 			if err != nil {
-				return err
+				return err, channelName
 			}
 		}
 	}
 	_, err = c.Writer.WriteString("ok")
 	if err != nil {
-		return err
+		return err, channelName
 	}
-	return nil
+	return nil, channelName
 }

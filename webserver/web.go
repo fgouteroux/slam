@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"strings"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
@@ -15,19 +16,34 @@ import (
 )
 
 var (
-	debug         bool
-	msgTmpl       *template.Template
-	errorsSending = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "slam_message_sent_errors",
-		Help: "Number of errors posting message to channels.",
-	})
+	debug   bool
+	msgTmpl *template.Template
+
+	msgFailedSent = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Subsystem: "slam",
+			Name:      "message_sent_failed_total",
+			Help:      "The total number of failed messages sent.",
+		},
+		[]string{"channel"},
+	)
+
+	msgSent = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Subsystem: "slam",
+			Name:      "message_sent_total",
+			Help:      "The total number of successfully messages sent.",
+		},
+		[]string{"channel"},
+	)
+
 	localCache    *memcache.MemCache
 	redisCache    *redigo.Pool
 	redisCacheTTL int
 )
 
 func init() {
-	prometheus.MustRegister(errorsSending)
+	prometheus.MustRegister(msgFailedSent, msgSent)
 }
 
 type webserver struct {
@@ -73,9 +89,19 @@ func (ws *webserver) Init(debugEnabled bool, templateFiles, redisHost string, re
 
 	router := gin.New()
 
-	if ws.Prometheus != nil {
-		ws.Prometheus.Use(router)
+	ws.Prometheus = ginprometheus.NewPrometheus("gin")
+	ws.Prometheus.ReqCntURLLabelMappingFn = func(c *gin.Context) string {
+		url := c.Request.URL.Path
+		for _, p := range c.Params {
+			if p.Key == "channel" {
+				url = strings.Replace(url, p.Value, ":channel", 1)
+				break
+			}
+		}
+		return url
 	}
+
+	ws.Prometheus.Use(router)
 
 	router.POST("/webhook/:channel", checkErr(ws.handleWebhook))
 
@@ -83,15 +109,17 @@ func (ws *webserver) Init(debugEnabled bool, templateFiles, redisHost string, re
 	return router
 }
 
-func checkErr(f func(c *gin.Context) error) gin.HandlerFunc {
+func checkErr(f func(c *gin.Context) (error, string)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		err := f(c)
+		err, channel := f(c)
 		if err != nil {
-			errorsSending.Inc()
+			msgFailedSent.WithLabelValues(channel).Inc()
 			log.Error(err)
 			c.JSON(400, gin.H{
 				"error": err.Error(),
 			})
+		} else {
+			msgSent.WithLabelValues(channel).Inc()
 		}
 	}
 }
