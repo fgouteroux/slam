@@ -72,6 +72,20 @@ Send an alert and use slack.tmpl file template:
 curl "http://localhost:8080/webhook/mychann?template=slack.tmpl" -X POST -H "Content-type: application/json" -d @payload.json
 ```
 
+## Setup alertmanager with slam (using webhook receiver)
+
+```
+global:
+  resolve_timeout: 5m
+route:
+  receiver: webhook_receiver
+receivers:
+  - name: webhook_receiver
+    webhook_configs:
+      - url: http://localhost:8080/webhook/mychann
+        send_resolved: true
+```
+
 ## Limitations
 
 If the webhook payload contains several alerts, it will wait that all alerts be resolved before update the original message.
