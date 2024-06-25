@@ -86,6 +86,27 @@ receivers:
         send_resolved: true
 ```
 
+## Prometheus metrics
+
+slam expose standard prometheus metrics on `/metrics` endpoint.
+
+```
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 0
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
+# HELP slam_message_sent_failed_total The total number of failed messages sent.
+# TYPE slam_message_sent_failed_total counter
+slam_message_sent_failed_total{channel="testfgx2"} 1
+# HELP slam_message_sent_total The total number of successfully messages sent.
+# TYPE slam_message_sent_total counter
+slam_message_sent_total{channel="testfgx"} 1
+```
+
 ## Limitations
 
 If the webhook payload contains several alerts, it will wait that all alerts be resolved before update the original message.
