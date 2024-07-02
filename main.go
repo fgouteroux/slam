@@ -9,9 +9,9 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/prometheus/common/version"
 	"github.com/slack-go/slack"
 
-	"github.com/fgouteroux/slam/version"
 	"github.com/fgouteroux/slam/webserver"
 )
 
@@ -45,7 +45,7 @@ func main() {
 	flag.Parse()
 
 	if *Version {
-		fmt.Println(version.Version())
+		fmt.Println(version.Print("slam"))
 		os.Exit(0)
 	}
 
