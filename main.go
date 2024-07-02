@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/prometheus/common/version"
+	log "github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
 
 	"github.com/fgouteroux/slam/webserver"
