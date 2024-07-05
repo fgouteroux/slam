@@ -8,12 +8,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/prometheus/common/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
 
 	"github.com/fgouteroux/slam/webserver"
 )
+
+var Version = "dev"
+var BuildTime string
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -38,14 +40,15 @@ func main() {
 	serverIdleTimeout := flag.Int("server.http-idle-timeout", 30, " Idle timeout for HTTP server")
 	serverGraceTimeout := flag.Int("server.grace-timeout", 5, " Grace timeout for shutdown HTTP server")
 
-	Version := flag.Bool("version", false, "show version")
+	version := flag.Bool("version", false, "show version")
 	required := []string{
 		"slack-token",
 	}
 	flag.Parse()
 
-	if *Version {
-		fmt.Println(version.Print("slam"))
+	if *version {
+		fmt.Println("Version:\t", Version)
+		fmt.Println("Build Time:\t", BuildTime)
 		os.Exit(0)
 	}
 

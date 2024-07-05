@@ -9,12 +9,9 @@ builds:
       - linux
       - windows
       - darwin
-    ldflags:
-      - -w -s
-      - -X "github.com/fgouteroux/slam/version.PlatformName={{.Os}}/{{.Arch}}"
-      - -X "github.com/fgouteroux/slam/version.GitCommit={{.Commit}}"
-      - -X "github.com/fgouteroux/slam/version.BuildTime={{.Date}}"
-      - -X "github.com/fgouteroux/slam/version.Version={{.Version}}"
+    ldflags: |
+      -X 'main.Version={{.Version}}'
+      -X 'main.BuildTime={{.Date}}'
     goarch:
       - amd64
 
