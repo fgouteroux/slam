@@ -107,6 +107,37 @@ slam_message_sent_failed_total{channel="testfgx2"} 1
 slam_message_sent_total{channel="testfgx"} 1
 ```
 
+## Endpoints
+
+### Webhook API
+
+Send slack message in a given channel
+```
+GET /webhook/<channel>
+```
+Status code: 200 if message sent.
+
+Response: ok
+
+
+### Ready / health API
+
+Readiness check (check slack authentication)
+```
+GET /ready
+```
+Status code: 200 if ready.
+
+Response: OK
+
+Healthiness check
+```
+GET /health
+```
+Status code: 200 if healthy.
+
+Response: OK
+
 ## Limitations
 
 If the webhook payload contains several alerts, it will wait that all alerts be resolved before update the original message.
