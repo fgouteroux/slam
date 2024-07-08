@@ -106,6 +106,7 @@ func (ws *webserver) Init(debugEnabled bool, templateFiles, redisHost string, re
 	router.POST("/webhook/:channel", checkErr(ws.handleWebhook))
 
 	router.GET("/health", ws.healthHandler)
+	router.GET("/ready", ws.readyHandler)
 	return router
 }
 

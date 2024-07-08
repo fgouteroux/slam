@@ -15,6 +15,14 @@ func (ws *webserver) healthHandler(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }
 
+func (ws *webserver) readyHandler(c *gin.Context) {
+	_, err := ws.Slack.AuthTest()
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+	c.String(http.StatusOK, "OK")
+}
+
 func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 	log.Debug(c.Request.Header)
 
