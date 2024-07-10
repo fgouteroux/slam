@@ -27,6 +27,9 @@ func main() {
 
 	cache := flag.String("cache", "local", "Cache type (local or redis)")
 
+	templateTitleAnnotation := flag.String("template.annotation.title", "summary", "Annotation key name to get for setting slack title message")
+	templateTitleLinkAnnotation := flag.String("template.annotation.title-link", "title_link", "Annotation key name to get for setting slack title link message")
+
 	redisDB := flag.Int("cache.redis.db", 0, "Redis DB")
 	redisHost := flag.String("cache.redis.host", "localhost:6379", "Redis host")
 	redisKeyTTL := flag.Int("cache.redis.key-ttl", 1296000, "Redis key ttl in seconds")
@@ -81,7 +84,7 @@ func main() {
 		log.Debugf("Using '%s' in '%s' slack workspace (%s)", authResult.User, authResult.Team, authResult.URL)
 	}
 
-	ws := webserver.New(slackClient, *cache)
+	ws := webserver.New(slackClient, *cache, *templateTitleAnnotation, *templateTitleLinkAnnotation)
 
 	listenAddr := fmt.Sprintf("%s:%d", *serverListenAddress, *serverListenPort)
 	srv, idleConnectionsClosed := webserver.NewServerWithTimeout(

@@ -70,8 +70,8 @@ func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 	if msg.Status == "firing" {
 		channelID, ts, err := ws.sendSlackMessage(
 			channelName,
-			msg.CommonAnnotations["summary"],
-			msg.CommonAnnotations["title_link"],
+			msg.CommonAnnotations[ws.TemplateTitleAnnotation],
+			msg.CommonAnnotations[ws.TemplateTitleLinkAnnotation],
 			renderedStr,
 			"",
 			color,

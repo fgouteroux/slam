@@ -47,16 +47,20 @@ func init() {
 }
 
 type webserver struct {
-	Cache      string
-	Slack      *slack.Client
-	Prometheus *ginprometheus.Prometheus
+	Cache                       string
+	Slack                       *slack.Client
+	Prometheus                  *ginprometheus.Prometheus
+	TemplateTitleAnnotation     string
+	TemplateTitleLinkAnnotation string
 }
 
 // New webserver
-func New(s *slack.Client, cache string) *webserver {
+func New(s *slack.Client, cache, templateTitleAnnotation, templateTitleLinkAnnotation string) *webserver {
 	return &webserver{
-		Slack: s,
-		Cache: cache,
+		Slack:                       s,
+		Cache:                       cache,
+		TemplateTitleAnnotation:     templateTitleAnnotation,
+		TemplateTitleLinkAnnotation: templateTitleLinkAnnotation,
 	}
 }
 

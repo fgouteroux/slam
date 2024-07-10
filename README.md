@@ -39,6 +39,10 @@ Usage of slam:
     	Slack app token (could be set by SLACK_TOKEN env var)
   -template-files string
     	Template files to load (files identified by the pattern, like *.tmpl)
+  -template.annotation.title string
+      Annotation key name to get for setting slack title message (default "summary")
+  -template.annotation.title-link string
+      Annotation key name to get for setting slack title link message (default "title_link")
   -version
     	show version
 ```
