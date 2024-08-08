@@ -68,6 +68,14 @@ func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 	}
 
 	if msg.Status == "firing" {
+		// do not send alert if already sent
+		if timestamp != "" && channelID != "" {
+			_, err := c.Writer.WriteString("ok")
+			if err != nil {
+				return err, channelName
+			}
+			return nil, channelName
+		}
 		channelID, ts, err := ws.sendSlackMessage(
 			channelName,
 			msg.CommonAnnotations[ws.TemplateTitleAnnotation],
