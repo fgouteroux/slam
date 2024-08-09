@@ -114,17 +114,14 @@ func (ws *webserver) Init(debugEnabled bool, templateFiles, redisHost string, re
 	return router
 }
 
-func checkErr(f func(c *gin.Context) (error, string)) gin.HandlerFunc {
+func checkErr(f func(c *gin.Context) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		err, channel := f(c)
+		err := f(c)
 		if err != nil {
-			msgFailedSent.WithLabelValues(channel).Inc()
 			log.Error(err)
 			c.JSON(400, gin.H{
 				"error": err.Error(),
 			})
-		} else {
-			msgSent.WithLabelValues(channel).Inc()
 		}
 	}
 }

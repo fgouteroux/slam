@@ -23,13 +23,13 @@ func (ws *webserver) readyHandler(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }
 
-func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
+func (ws *webserver) handleWebhook(c *gin.Context) error {
 	log.Debug(c.Request.Header)
 
 	msg := &alertmanagerTmpl.Data{}
 	err := c.ShouldBindJSON(msg)
 	if err != nil {
-		return err, ""
+		return err
 	}
 
 	channelName := c.Param("channel")
@@ -39,7 +39,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 
 	renderedStr, err := renderTemplate(msg, templateName)
 	if err != nil {
-		return err, channelName
+		return err
 	}
 
 	color := "danger"
@@ -72,9 +72,9 @@ func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 		if timestamp != "" && channelID != "" {
 			_, err := c.Writer.WriteString("ok")
 			if err != nil {
-				return err, channelName
+				return err
 			}
-			return nil, channelName
+			return nil
 		}
 		channelID, ts, err := ws.sendSlackMessage(
 			channelName,
@@ -87,8 +87,12 @@ func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 			false,
 		)
 		if err != nil {
-			return err, channelName
+			msgFailedSent.WithLabelValues(channelName).Inc()
+			return err
 		}
+
+		msgSent.WithLabelValues(channelName).Inc()
+
 		data := map[string]string{
 			"status":    msg.Status,
 			"timestamp": ts,
@@ -120,8 +124,12 @@ func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 				true,
 			)
 			if err != nil {
-				return err, channelName
+				msgFailedSent.WithLabelValues(channelName).Inc()
+				return err
 			}
+
+			msgSent.WithLabelValues(channelName).Inc()
+
 			// remove key from cache
 			if ws.Cache == "local" {
 				localCache.Del(key)
@@ -145,13 +153,15 @@ func (ws *webserver) handleWebhook(c *gin.Context) (error, string) {
 				false,
 			)
 			if err != nil {
-				return err, channelName
+				msgFailedSent.WithLabelValues(channelName).Inc()
+				return err
 			}
+			msgSent.WithLabelValues(channelName).Inc()
 		}
 	}
 	_, err = c.Writer.WriteString("ok")
 	if err != nil {
-		return err, channelName
+		return err
 	}
-	return nil, channelName
+	return nil
 }
