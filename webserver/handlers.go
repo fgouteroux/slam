@@ -35,7 +35,10 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 	channelName := c.Param("channel")
 	templateName := c.Query("template")
 
-	key := Hash(msg.GroupKey)
+	log.Debugf("Alert '%s' for group key: '%s'", msg.Status, msg.GroupKey)
+
+	// Add channel name in key to allow sending the same message in different channel
+	key := channelName + ":" + Hash(msg.GroupKey)
 
 	renderedStr, err := renderTemplate(msg, templateName)
 	if err != nil {
@@ -56,6 +59,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 			data := cached.Value.(map[string]string)
 			timestamp = data["timestamp"]
 			channelID = data["channelID"]
+			log.Debugf("Key '%s' found", key)
 		}
 	} else if ws.Cache == "redis" {
 		jsonData, err := redis.Get(redisCache, key)
@@ -64,6 +68,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 			_ = json.Unmarshal([]byte(jsonData), &data)
 			timestamp = data["timestamp"]
 			channelID = data["channelID"]
+			log.Debugf("Key '%s' found", key)
 		}
 	}
 
@@ -74,6 +79,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 			if err != nil {
 				return err
 			}
+			log.Debugf("Alert key '%s' already sent", key)
 			return nil
 		}
 		channelID, ts, err := ws.sendSlackMessage(
@@ -91,6 +97,8 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 			return err
 		}
 
+		log.Debugf("Alert key '%s' sent", key)
+
 		msgSent.WithLabelValues(channelName).Inc()
 
 		data := map[string]string{
@@ -101,12 +109,14 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 
 		if ws.Cache == "local" {
 			localCache.Set(key, data)
+			log.Debugf("Key '%s' saved", key)
 		} else if ws.Cache == "redis" {
 			dataraw, _ := json.Marshal(data)
 			err = redis.Set(redisCache, key, []byte(dataraw), redisCacheTTL)
 			if err != nil {
 				log.Errorf("Could not set key in redis: %v", err)
 			}
+			log.Debugf("Key '%s' saved", key)
 		}
 
 	} else {
@@ -133,11 +143,13 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 			// remove key from cache
 			if ws.Cache == "local" {
 				localCache.Del(key)
+				log.Debugf("Key '%s' deleted", key)
 			} else if ws.Cache == "redis" {
 				_, err := redis.Delete(redisCache, key)
 				if err != nil {
 					log.Errorf("unable to delete redis key: %s", key)
 				}
+				log.Debugf("Key '%s' deleted", key)
 			}
 
 		} else {
