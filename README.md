@@ -10,41 +10,43 @@ It update the original slack channel message to avoid searching if an alert is r
 ```
 Usage of slam:
   -cache string
-    	Cache type (local or redis) (default "local")
+      Cache type (local or redis) (default "local")
   -cache.redis.db int
-    	Redis DB
+      Redis DB
   -cache.redis.host string
-    	Redis host  (default "localhost:6379")
+      Redis host (default "localhost:6379")
   -cache.redis.key-ttl int
       Redis key ttl in seconds (default 1296000)
   -debug
-    	Enable debug mode
+      Enable debug mode
   -server.grace-timeout int
-    	 Grace timeout for shutdown HTTP server (default 5)
+       Grace timeout for shutdown HTTP server (default 5)
   -server.http-idle-timeout int
-    	 Idle timeout for HTTP server (default 30)
+       Idle timeout for HTTP server (default 30)
   -server.http-listen-address string
-    	 Listen address for HTTP server
+       Listen address for HTTP server
   -server.http-listen-port int
-    	 Listen address for HTTP server (default 8080)
+       Listen address for HTTP server (default 8080)
   -server.http-read-timeout int
-    	Read timeout for HTTP server (default 30)
+      Read timeout for HTTP server (default 30)
   -server.http-write-timeout int
-    	Write timeout for HTTP server (default 30)
+      Write timeout for HTTP server (default 30)
   -server.tls-cert-path string
-    	TLS certificate path for HTTP server
+      TLS certificate path for HTTP server
   -server.tls-key-path string
-    	TLS key path for HTTP server
+      TLS key path for HTTP server
+  -slack-msg-length-limit int
+      Slack message length limit before truncate. (default 1000)
   -slack-token string
-    	Slack app token (could be set by SLACK_TOKEN env var)
+      Slack app token (could be set by SLACK_TOKEN env var)
   -template-files string
-    	Template files to load (files identified by the pattern, like *.tmpl)
+      Template files to load (files identified by the pattern, like *.tmpl)
   -template.annotation.title string
       Annotation key name to get for setting slack title message (default "summary")
   -template.annotation.title-link string
       Annotation key name to get for setting slack title link message (default "title_link")
   -version
-    	show version
+      show version
 ```
 
 ## How it's works

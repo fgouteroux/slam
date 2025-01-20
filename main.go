@@ -22,6 +22,7 @@ func main() {
 	debug := flag.Bool("debug", os.Getenv("DEBUG") == "true", "Enable debug mode")
 
 	slackToken := flag.String("slack-token", os.Getenv("SLACK_TOKEN"), "Slack app token (could be set by SLACK_TOKEN env var)")
+	slackMsgLengthLimit := flag.Int("slack-msg-length-limit", 1000, "Slack message length limit before truncate.")
 
 	templateFiles := flag.String("template-files", "", "Template files to load (files identified by the pattern, like *.tmpl)")
 
@@ -84,7 +85,7 @@ func main() {
 		log.Debugf("Using '%s' in '%s' slack workspace (%s)", authResult.User, authResult.Team, authResult.URL)
 	}
 
-	ws := webserver.New(slackClient, *cache, *templateTitleAnnotation, *templateTitleLinkAnnotation)
+	ws := webserver.New(slackClient, *cache, *templateTitleAnnotation, *templateTitleLinkAnnotation, *slackMsgLengthLimit)
 
 	listenAddr := fmt.Sprintf("%s:%d", *serverListenAddress, *serverListenPort)
 	srv, idleConnectionsClosed := webserver.NewServerWithTimeout(

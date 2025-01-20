@@ -22,11 +22,10 @@ var (
 )
 
 func (ws *webserver) sendSlackMessage(channel, title, titleLink, text, footer, color, timestamp string, update bool) (string, string, error) {
-	maxCharacters := 1000
 	textLength := len(text)
 
-	if textLength > maxCharacters {
-		text = text[:maxCharacters] + fmt.Sprintf(" ...truncated to %d chars. was %d.", maxCharacters, textLength)
+	if textLength > ws.slackMsgLengthLimit {
+		text = text[:ws.slackMsgLengthLimit] + fmt.Sprintf(" ...truncated to %d chars. was %d.", ws.slackMsgLengthLimit, textLength)
 	}
 	msgoptions := []slack.MsgOption{}
 

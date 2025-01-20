@@ -52,15 +52,17 @@ type webserver struct {
 	Prometheus                  *ginprometheus.Prometheus
 	TemplateTitleAnnotation     string
 	TemplateTitleLinkAnnotation string
+	slackMsgLengthLimit         int
 }
 
 // New webserver
-func New(s *slack.Client, cache, templateTitleAnnotation, templateTitleLinkAnnotation string) *webserver {
+func New(s *slack.Client, cache, templateTitleAnnotation, templateTitleLinkAnnotation string, slackMsgLengthLimit int) *webserver {
 	return &webserver{
 		Slack:                       s,
 		Cache:                       cache,
 		TemplateTitleAnnotation:     templateTitleAnnotation,
 		TemplateTitleLinkAnnotation: templateTitleLinkAnnotation,
+		slackMsgLengthLimit:         slackMsgLengthLimit,
 	}
 }
 
